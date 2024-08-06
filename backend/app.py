@@ -5,10 +5,8 @@ import json
 from datetime import datetime
 import random
 import traceback
-from flask_sslify import SSLify
 
 app = Flask(__name__)
-sslify = SSLify(app)
 CORS(app, resources={r"/employees/*": {"origins": "http://localhost:3000"}})
 
 import mysql.connector
@@ -341,4 +339,4 @@ def get_employee(id):
     return jsonify(employee)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3001)
+    app.run(host="0.0.0.0", port=3001)
