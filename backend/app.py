@@ -7,96 +7,116 @@ import random
 import traceback
 
 app = Flask(__name__)
-CORS(app, resources={r"/employees/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/employees/*": {"origins": "*"}})
 
 import mysql.connector
 from mysql.connector import Error
 
-try:
-    db = mysql.connector.connect(
-        host="35.224.61.48",
-        user="trial_user",
-        password="trial_user_12345#",
-        port=3306,
-        database="MERCOR_TRIAL_SCHEMA"
-    )
+def create_connection():
+    try:
+        db = mysql.connector.connect(
+            host="35.224.61.48",
+            user="trial_user",
+            password="trial_user_12345#",
+            port=3306,
+            database="MERCOR_TRIAL_SCHEMA"
+        )
 
-    if db.is_connected():
-        print("Successfully connected to the database")
-        # Your logic here
+        if db.is_connected():
+            print("Successfully connected to the database")
+            # Your logic here
 
-except Error as e:
-    print(f"Error while connecting to MySQL: {e}")
+    except Error as e:
+        print(f"Error while connecting to MySQL: {e}")
 
-finally:
-    if (db.is_connected()):
-        print("MySQL connection is connected")
+    finally:
+        if (db.is_connected()):
+            print("MySQL connection is connected")
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SET SESSION group_concat_max_len = 1000000")
+    return db,cursor
 
-cursor = db.cursor(dictionary=True)
-cursor.execute("SET SESSION group_concat_max_len = 1000000")
+def close_connection(conn):
+    if conn.is_connected():
+        conn.close()
+        print("Connection Closed")
 
 # Set of queries to just get the data from the DB to view and analyse the data parameters and make see relationships of different tables.
 @app.route('/employees/MercorUsers', methods=['GET'])
 def get_MercorUsers():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM MercorUsers LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/skills', methods=['GET'])
 def get_skills():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM Skills LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/MercorUserSkills', methods=['GET'])
 def get_MercorUserSkills():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM MercorUserSkills LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/UserResume', methods=['GET'])
 def get_UserResume():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM UserResume LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/PersonalInformation', methods=['GET'])
 def get_PersonalInformation():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM PersonalInformation LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/WorkExperience', methods=['GET'])
 def get_WorkExperience():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM WorkExperience LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 @app.route('/employees/Education', methods=['GET'])
 def get_Education():
+    conn, cursor = create_connection()
     limit = int(request.args.get('limit', 100000))
     offset = int(request.args.get('offset', 0))
     query = "SELECT * FROM Education LIMIT %s OFFSET %s"
     cursor.execute(query, (limit, offset))
     employees = cursor.fetchall()
+    close_connection(conn)
     return jsonify(employees)
 
 
@@ -140,6 +160,7 @@ def get_employees():
     ]
 
     try:
+        conn, cursor = create_connection()
         print("request",request.args)
         limit = int(request.args.get('limit', 0))
         offset = int(request.args.get('offset', 0))
@@ -213,8 +234,10 @@ def get_employees():
                 item['experience'] = 0
             item['summary'] = random_descriptions[random.randint(0,len(random_descriptions)-1)]
 
+        close_connection(conn)
         return jsonify(employees)
     except Exception as e:
+        close_connection(conn)
         traceback.print_exc()
         print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -227,6 +250,7 @@ def get_employees():
 '''
 @app.route('/employees/<id>', methods=['GET'])
 def get_employee(id):
+    conn, cursor = create_connection()
     query = "SELECT \
             User.userId,  \
             User.name,  \
@@ -335,7 +359,7 @@ def get_employee(id):
             continue
     print(maxEndDate,minStartDate)
     employee['experience'] = maxEndDate - minStartDate
-
+    close_connection(conn)
     return jsonify(employee)
 
 if __name__ == '__main__':
