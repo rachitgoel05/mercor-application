@@ -38,7 +38,7 @@ const CardDetail = () => {
 	const fetchIndividual = async () => {
 		try {
 			const employeeDetailData = await axios.get(
-				`http://localhost:3001/employees/${id}`
+				`https://1456ntefmb.execute-api.ap-south-1.amazonaws.com/Prod/employees/${id}`
 			);
 			setEmployeeDetailData(employeeDetailData.data);
 		} catch (error) {

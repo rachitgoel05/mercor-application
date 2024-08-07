@@ -17,7 +17,7 @@ const Main = () => {
 		setLoading(true);
 		try {
 			const response = await axios.get(
-				`http://localhost:3001/employees?offset=${offset}&limit=${limit}&search=${searchTerm}`
+				`https://1456ntefmb.execute-api.ap-south-1.amazonaws.com/Prod/employees?offset=${offset}&limit=${limit}&search=${searchTerm}`
 			);
 			setProfiles((prevProfiles) => [...prevProfiles, ...response.data]);
 			setOffset(offset + 10);
@@ -31,7 +31,7 @@ const Main = () => {
 		setLoading(true);
 		try {
 			const response = await axios.get(
-				`http://localhost:3001/employees?search=${value}&limit=${10}`
+				`https://1456ntefmb.execute-api.ap-south-1.amazonaws.com/Prod/employees?search=${value}&limit=${10}`
 			);
 			setProfiles(response.data);
 		} catch (error) {
